@@ -24,7 +24,7 @@ public class GA {
 	}
 	
 	public boolean isTerminationConditionMet(Population population) {
-		return population.getFittest(0).getFitness() == 100.0;
+		return population.getFittest(0).getFitness() >= 99.9; //depends on how optimal you want it to be, for speed, set to 98.5
 	}
 	
 	public double calcFitness(Individual individual, Schedule schedule) {

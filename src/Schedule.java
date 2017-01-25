@@ -8,8 +8,8 @@ public class Schedule {
     private final HashMap<Integer, Block> blocks;
     private Class classes[];
     
-    private int numClasses = 10;
-    private int[] moduleArray = {1,1,1,2,2,3,4,5,5,6};
+    private final int numClasses = 15;
+    private int[] moduleArray = {1,1,2,2,3,4,5,6,6,7,8,8,9,9,10};
 	double studentScore = 0;
 
     
@@ -63,6 +63,10 @@ public class Schedule {
         return (Module) this.modules.get(moduleId);
     }
     
+    public int getModuleIdFromModuleArray(int id){
+    	return moduleArray[id];
+    }
+    
     public int[] getStudentModules(int studentId) {
         Student student = (Student) this.students.get(studentId);
         return student.getPreferredClasses();
@@ -108,7 +112,6 @@ public class Schedule {
     
     public void addStudent(int studentId, int studentSchoolId, String lastName, String firstName, int grade, int preferredClasses[]) {
         this.students.put(studentId, new Student(studentId, studentSchoolId, lastName, firstName, grade, preferredClasses));
-        this.numClasses = 0;
     }
     
     public void addBlock(int blockId, String blockTime) {
@@ -131,13 +134,15 @@ public class Schedule {
         }
         this.numClasses = numClasses;
         return this.numClasses;*/
-    	return numClasses;
+    	return this.numClasses;
     }
     
     public void createClasses(Individual individual) {
-    	Class classes[] = new Class[this.getNumClasses()];
+    	classes = new Class[this.getNumClasses()];
     	int chromosome[] = individual.getChromosome();
     	int cI = 0; //class index
+    	//System.out.println("Chromosome length: " + chromosome.length);
+    	
 		for(int i=0; i<numClasses; i++){
 			//module array [111,22,333,4,55,666,7]
 			//as in eng01,eng02,eng03,math01,math02,sci01,sci02,sci03
@@ -182,9 +187,15 @@ public class Schedule {
 	    		}
 	    	}
     	}
-    	Student[] sA = (Student[])students.values().toArray();
-    	for(Student s: sA){
-    		int n = s.numberFit(classes);
+    	Object[] sA = students.values().toArray();
+    	for(Object s: sA){
+    		int n = ((Student)s).numberFit(classes);
+    		/*int[] ta = ((Student)s).getMaxBlockList();
+    		System.out.print(((Student) s).getLastName() + " " + ((Student) s).getFirstName() + " Schedule: ");
+    		for(int i=0; i<((Student) s).getPreferredClasses().length; i++){
+    			System.out.println(modules.get(((Student) s).getPreferredClasses()[i]).getModuleName() + ": Block " + ta[i]);
+    		}
+    		System.out.println();*/
     		if(n == 7){
     			
     		}else{
@@ -193,8 +204,66 @@ public class Schedule {
     		studentScore += n;
     	}
     	scheduleScore = (1/(double)(clashes+1))*100;
-    	studentScore = ((int)(studentScore/(double)sA.length)*10000)/100;
+    	int idealScore = 7*sA.length; // preferred schedule size * total number of students
+    	studentScore = (studentScore/(double)idealScore)*100; //mapping to 100%
+    	/*System.out.println("Schedule clashes: " + clashes);
+    	System.out.println("Schedule score: " + scheduleScore);
+    	System.out.println("Student clashes: " + studentClashes);
+    	System.out.println("Student score: " + studentScore);*/
+    	System.out.println("Actual Score: " + (scheduleScore*0.7+studentScore*0.3));
     	return scheduleScore*0.7+studentScore*0.3;
     }
     
+
+	public double calculateFScheduleScore(){
+		int clashes = 0;
+		double scheduleScore = 0;
+		int studentClashes = 0; //not reach 7
+		for (Class classA : this.classes) {
+			for (Class classB : this.classes) {
+	            if (classA.getRoomId() == classB.getRoomId() && classA.getBlockId() == classB.getBlockId() && classA.getClassId() != classB.getClassId()){
+	            	clashes++;
+	                break; 
+	            }
+	        }
+	    	for (Class classB : this.classes) {
+	    		if (classA.getTeacherId() == classB.getTeacherId() && classA.getBlockId() ==classB.getBlockId() && classA.getClassId() != classB.getClassId()) {
+	    	       clashes++;
+	    	       break;
+	    		}
+	    	}
+	    	if(modules.get(classA.getModuleId()).getIsLab()){
+	    		if(!rooms.get(classA.getRoomId()).getIsLab()){
+	    			clashes++;
+	    		}
+	    	}
+		}
+		Object[] sA = students.values().toArray();
+		for(Object s: sA){
+			int n = ((Student)s).numberFit(classes);
+			int[] ta = ((Student)s).getMaxBlockList();
+			System.out.println(((Student) s).getLastName() + " " + ((Student) s).getFirstName() + " Schedule: ");
+			for(int i=0; i<((Student) s).getPreferredClasses().length; i++){
+				System.out.println(modules.get(((Student) s).getPreferredClasses()[i]).getModuleName() + ": Block " + ta[i]);
+			}
+			System.out.println();
+			if(n == 7){
+				
+			}else{
+				studentClashes++;
+			}
+			studentScore += n;
+		}
+		scheduleScore = (1/(double)(clashes+1))*100;
+		int idealScore = 7*sA.length; // preferred schedule size * total number of students
+		studentScore = (studentScore/(double)idealScore)*100; //mapping to 100%
+		System.out.println("Schedule clashes: " + clashes);
+		System.out.println("Schedule score: " + scheduleScore);
+		System.out.println("Student clashes: " + studentClashes);
+		System.out.println("Student score: " + studentScore);
+		System.out.println("Actual Score: " + (scheduleScore*0.7+studentScore*0.3));
+		return scheduleScore*0.7+studentScore*0.3;
+	}
+
 }
+

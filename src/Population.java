@@ -14,6 +14,7 @@ public class Population {
 	
 	public Population(int populationSize, Schedule schedule) {
 		this.population = new Individual[populationSize];
+		
 		for (int individualCount = 0; individualCount < populationSize; individualCount++) {
 			Individual individual = new Individual(schedule);
 			this.population[individualCount] = individual;

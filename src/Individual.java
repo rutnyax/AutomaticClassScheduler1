@@ -11,6 +11,7 @@ public class Individual {
 		int newChromosome[] = new int[chromosomeLength];
 		int chromosomeIndex = 0;
 		// Loop through groups
+
 		for(int i=0; i<schedule.getNumClasses(); i++){
 			int blockId = schedule.getRandomBlock().getBlockId();
 			newChromosome[chromosomeIndex] = blockId;
@@ -18,7 +19,7 @@ public class Individual {
 			int roomId = schedule.getRandomRoom().getRoomId();
 			newChromosome[chromosomeIndex] = roomId;
 			chromosomeIndex++;
-			Module module = schedule.getModule(i);
+			Module module = schedule.getModule(schedule.getModuleIdFromModuleArray(i));			
 			newChromosome[chromosomeIndex] = module.getRandomTeacherId();
 			chromosomeIndex++;
 		}

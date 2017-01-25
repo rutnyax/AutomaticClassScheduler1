@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -8,6 +10,7 @@ public class Student {
 	private final String firstName;
 	private final int grade;
 	private final int[] preferredClasses;
+	private int[] maxBlockList = new int[7];
 	
 	public Student(int studentId, int studentSchoolId, String lastName, String firstName, int grade, int[] preferredClasses){
 		this.studentId = studentId;
@@ -42,13 +45,23 @@ public class Student {
 		return this.preferredClasses;
 	}
 	
+	public int[] getMaxBlockList(){
+		return this.maxBlockList;
+	}
+	
 	public int numberFit(Class classes[]){
-		HashMap<Integer, List> moduleSlots = new HashMap<Integer, List>(); 
+		HashMap<Integer, ArrayList> moduleSlots = new HashMap<Integer, ArrayList>(); 
 		//construct block array for module
 		for(Class c: classes){
-			List mBlocks = moduleSlots.get(c.getModuleId());
-			mBlocks.add(c.getBlockId());
-			moduleSlots.put(c.getModuleId(),mBlocks);	
+			if(moduleSlots.get(c.getModuleId()) != null){
+				ArrayList mBlocks = moduleSlots.get(c.getModuleId());
+				mBlocks.add(c.getBlockId());
+				moduleSlots.put(c.getModuleId(),mBlocks);
+			}else{
+				ArrayList mBlocks = new ArrayList();
+				mBlocks.add(c.getBlockId());
+				moduleSlots.put(c.getModuleId(),mBlocks);
+			}
 		}
 		
 		//traversal and backtracking algorithm
@@ -57,8 +70,10 @@ public class Student {
 		int[] tempBlockList = new int[7];
 		for(int i=0; i<preferredClasses.length; i++){
 			blocksOf7[i] = moduleSlots.get(preferredClasses[i]);
+			
 		}
 		
+
 		/*
 		for(int i=0; i<blocksOf7.length; i++){
 			int[][] indivBlockId = new int[blocksOf7.length][blocksOf7[i].size()];
@@ -74,6 +89,7 @@ public class Student {
 			}
 		}*/
 		
+		//to fix "might not get to loop 6 because some might not be able to fit a single class", we can set the loop so taht i.e. i0<=blocksOf7[0], and add if statement afterward stating that if i==0, it continues.
 		outLoop:
 		for(int i0=0; i0<blocksOf7[0].size();i0++){
 			tempBlockList[0] = (int)blocksOf7[0].get(i0);
@@ -88,13 +104,17 @@ public class Student {
 							for(int i5=0; i5<blocksOf7[5].size();i5++){
 								tempBlockList[5] = (int)blocksOf7[5].get(i5);
 								for(int i6=0; i6<blocksOf7[6].size();i6++){
+									
 									tempBlockList[6] = (int)blocksOf7[6].get(i6);
+									//System.out.println((int)blocksOf7[6].get(i6));
 									int tempNum = evaluateTempBlockList(tempBlockList);
 									if(tempNum == 7){
 										maxNumFit = 7;
+										copyArray(tempBlockList,maxBlockList);
 										break outLoop;
 									}else if(tempNum > maxNumFit){
 										maxNumFit = tempNum;
+										copyArray(tempBlockList,maxBlockList);
 									}
 								}
 							}
@@ -104,6 +124,12 @@ public class Student {
 			}
 		}
 		return maxNumFit;
+	}
+	
+	private void copyArray(int[] a, int[] b){
+		for(int i=0; i<a.length; i++){
+			b[i] = a[i];
+		}
 	}
 	
 	private int evaluateTempBlockList(int[] tbl){

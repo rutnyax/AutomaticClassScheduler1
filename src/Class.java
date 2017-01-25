@@ -1,8 +1,8 @@
 
 public class Class {
-	private final int classId;
+	private int classId;
 	//private final int studentId;
-	private final int moduleId;
+	private int moduleId;
 	private int teacherId;
 	private int blockId;
 	private int roomId;
